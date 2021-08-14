@@ -39,36 +39,44 @@ def trainSearch(origin, destination, date, time):
     Station codes can be searched for with stationCode() function
     """
 
-
+    #Sends request for journeys for matching journeys
     url = "https://transportapi.com/v3/uk/train/station/{0}/{1}/{2}/timetable.json?app_id={3}&app_key={4}&calling_at={5}&train_status=passenger".format(
         origin, date, time, app_id, app_key, destination)
-
     response = requests.get(url).json()
 
-    search_ret = []
-
+    #Objects for loop
+    search_res = []
+    train_info = {}
+    trainURL = ""
     for i in response['departures']['all']:
-        id = i['service_timetable']['id']
-        trainURL = id
-
+        #Requests detailed information about the train
+        trainURL = i['service_timetable']['id']
         train_res = requests.get(trainURL).json()
 
+        #Gets time train arrives at destination
         for stop in train_res['stops']:
             if stop['station_code'] == destination:
                 arrival_time = stop['aimed_arrival_time']
 
-        train_ret = {
+        train_info = {
             'Departure Time': i['aimed_departure_time'],
             'Arrival Time' : arrival_time,
             'Operator' : train_res['operator_name'],
         }
 
-        search_ret.append(train_ret)
+        search_res.append(train_info)
 
-    return search_ret
+    search_res = sorted(search_res, key=lambda k: k['Arrival Time']) 
+
+    return search_res
 
 
-print(trainSearch(stationCode("Sheffield"), stationCode("Manchester pic"), "2021-08-13", "18:40"))
+
+
+# print(trainSearch(stationCode("Sheffield"), stationCode("Manchester pic"), "2021-08-13", "18:40"))
+
+for i in trainSearch(stationCode("Sheffield"), stationCode("Manchester pic"), "2021-08-14", "18:40"):
+    print(str(i) + " >>>>>>> " + str(trainSearch(stationCode("Manchester pic"), stationCode("Chester"), "2021-08-14", i['Arrival Time'])[0]))
 
 # print(stationCode("Wrexham", 'list'))
 
