@@ -31,12 +31,13 @@ def stationCode(name, type=None):
 
 
 
-def trainSearch(origin, destination, date, time):
+def trainSearch(origin, destination, date, time, num):
     """Returns a list of journeys from one station to another
 
     Arguments:
-    Origin & destination should be entered as station codes
+    Origin & destination -- should be entered as station codes
     Station codes can be searched for with stationCode() function
+    Num -- number of results to generated
     """
 
     #Sends request for journeys for matching journeys
@@ -65,20 +66,26 @@ def trainSearch(origin, destination, date, time):
         }
 
         search_res.append(train_info)
+        if len(search_res) == num: break
 
     search_res = sorted(search_res, key=lambda k: k['Arrival Time']) 
 
     return search_res
 
+def changeTrain(origin, destination, change_location, date, time, num):
+    return_string = ""
+    for i in trainSearch(stationCode(origin), stationCode(change_location), date, time, num):
+        return_string += str(i) + " >>>>>>> " + str(trainSearch(stationCode(change_location), stationCode(destination), date, i['Arrival Time'], num)[0]) + "\n"
+
+    return return_string
+
+print(changeTrain("Sheffield", "chester", "Manchester Pic", "2021-08-14", "18:40", 5))
 
 
+# for i in (trainSearch(stationCode("Sheffield"), stationCode("Manchester pic"), "2021-08-14", "18:40", 2)):
+#     print(i)
 
-# print(trainSearch(stationCode("Sheffield"), stationCode("Manchester pic"), "2021-08-13", "18:40"))
 
-for i in trainSearch(stationCode("Sheffield"), stationCode("Manchester pic"), "2021-08-14", "18:40"):
-    print(str(i) + " >>>>>>> " + str(trainSearch(stationCode("Manchester pic"), stationCode("Chester"), "2021-08-14", i['Arrival Time'])[0]))
-
-# print(stationCode("Wrexham", 'list'))
 
 
 
